@@ -1,4 +1,5 @@
 package search
+
 import kotlin.system.exitProcess
 import java.io.File
 
@@ -8,6 +9,7 @@ fun main(args: Array<String>) {
 
 class SimpleSearchEngine(args: Array<String>) {
     private val dataLines = mutableListOf<String>()
+    private val invertedIndex = mutableMapOf<String, MutableSet<Int>>()
 
     init {
         if (args.contains("--data")) {
@@ -15,9 +17,21 @@ class SimpleSearchEngine(args: Array<String>) {
             if (fileNameIndex < args.size) {
                 val fileName = args[fileNameIndex]
                 dataLines.addAll(File(fileName).readLines())
+                buildInvertedIndex()
             }
         }
         menu()
+    }
+
+    private fun buildInvertedIndex() {
+        dataLines.forEachIndexed { index, line ->
+            line.split("\\s".toRegex()).forEach { word ->
+                val cleanWord = word.lowercase().trim()
+                if (cleanWord.isNotEmpty()) {
+                    invertedIndex.computeIfAbsent(cleanWord) { mutableSetOf() }.add(index)
+                }
+            }
+        }
     }
 
     private fun menu() {
@@ -43,12 +57,14 @@ class SimpleSearchEngine(args: Array<String>) {
 
     private fun search() {
         println("Enter a name or email to search all suitable people.")
-        val query = readln().lowercase()
-        val results = dataLines.filter { it.lowercase().contains(query) }
+        val query = readln().lowercase().trim()
+        val indices = invertedIndex[query]
 
-        if (results.isNotEmpty()) {
+        if (indices != null && indices.isNotEmpty()) {
             println("People found:")
-            results.forEach { println(it) }
+            indices.forEach { index ->
+                println(dataLines[index])
+            }
         } else {
             println("No matching people found.")
         }
@@ -59,5 +75,3 @@ class SimpleSearchEngine(args: Array<String>) {
         dataLines.forEach { println(it) }
     }
 }
-
-
