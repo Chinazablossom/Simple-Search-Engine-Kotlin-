@@ -7,14 +7,32 @@ fun main() {
 class SimpleSearchEngine {
 
     init {
-        val sequenceOfWords = readlnOrNull()?.split("\\s".toRegex())
-        val wordToFind = readlnOrNull()
-        var indexOfWord = "Not found"
-        sequenceOfWords?.forEachIndexed { index, s ->
-            if (s.equals(wordToFind,true) )  indexOfWord = "${index + 1}"
+
+        println("Enter the number of people:")
+        val numberOfPeople = readln().toInt()
+        val dataLines = mutableListOf<String>()
+
+        println("Enter all people:")
+        repeat(numberOfPeople) {
+            dataLines.add(readln())
+        }
+        println("\nEnter the number of search queries:")
+        val numOfSearchQueries = readln().toInt()
+
+        repeat(numOfSearchQueries) {
+            println("Enter data to search people:")
+            val data = readln().lowercase()
+            val results = dataLines.filter { it.lowercase().contains(data) }
+
+            if (results.isNotEmpty()) {
+                println("People found:")
+                results.forEach { println(it) }
+            } else {
+                println("No matching people found.")
+            }
         }
 
-        println(indexOfWord)
+
     }
 }
 
