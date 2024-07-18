@@ -1,26 +1,26 @@
 package search
-
 import kotlin.system.exitProcess
+import java.io.File
 
-fun main() {
-    SimpleSearchEngine()
+fun main(args: Array<String>) {
+    SimpleSearchEngine(args)
 }
 
-class SimpleSearchEngine {
-    val dataLines = mutableListOf<String>()
+class SimpleSearchEngine(args: Array<String>) {
+    private val dataLines = mutableListOf<String>()
 
     init {
+        if (args.contains("--data")) {
+            val fileNameIndex = args.indexOf("--data") + 1
+            if (fileNameIndex < args.size) {
+                val fileName = args[fileNameIndex]
+                dataLines.addAll(File(fileName).readLines())
+            }
+        }
         menu()
     }
 
     private fun menu() {
-        println("Enter the number of people:")
-        val numberOfPeople = readln().toInt()
-
-        println("Enter all people:")
-        repeat(numberOfPeople) {
-            dataLines.add(readln())
-        }
         do {
             println("\n=== Menu ===")
             println(
@@ -29,43 +29,35 @@ class SimpleSearchEngine {
                         "0. Exit"
             )
 
-            val userInput = readln().toInt()
-            when (userInput) {
+            when (readln().toInt()) {
                 0 -> {
-                    println("\nBye!")
+                    println("Bye!")
                     exitProcess(0)
                 }
                 1 -> search()
                 2 -> displayAllPeople()
-                else -> {
-                    println("Incorrect option! Try again.")
-                }
-
+                else -> println("Incorrect option! Try again.")
             }
-
-        } while (userInput != 0)
-
-
+        } while (true)
     }
 
     private fun search() {
-            println("Enter a name or email to search all suitable people.")
-            val data = readln().lowercase()
-            val results = dataLines.filter { it.lowercase().contains(data) }
+        println("Enter a name or email to search all suitable people.")
+        val query = readln().lowercase()
+        val results = dataLines.filter { it.lowercase().contains(query) }
 
-            if (results.isNotEmpty()) {
-                println("People found:")
-                results.forEach { println(it) }
-            } else {
-                println("No matching people found.")
-            }
-
+        if (results.isNotEmpty()) {
+            println("People found:")
+            results.forEach { println(it) }
+        } else {
+            println("No matching people found.")
+        }
     }
 
     private fun displayAllPeople() {
-        println("\n=== List of people ===\n${dataLines.joinToString("\n")}")
+        println("\n=== List of people ===")
+        dataLines.forEach { println(it) }
     }
-
-
 }
+
 
