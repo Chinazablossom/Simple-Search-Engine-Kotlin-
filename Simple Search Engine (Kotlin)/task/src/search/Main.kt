@@ -56,17 +56,50 @@ class SimpleSearchEngine(args: Array<String>) {
     }
 
     private fun search() {
+        println("Select a matching strategy: ALL, ANY, NONE")
+        val strategy = readln().uppercase().trim()
         println("Enter a name or email to search all suitable people.")
-        val query = readln().lowercase().trim()
-        val indices = invertedIndex[query]
+        val query = readln().lowercase().trim().split(" ")
 
-        if (indices != null && indices.isNotEmpty()) {
-            println("People found:")
-            indices.forEach { index ->
-                println(dataLines[index])
+        val results = when (strategy) {
+            "ALL" -> searchAll(query)
+            "ANY" -> searchAny(query)
+            "NONE" -> searchNone(query)
+            else -> {
+                println("Unknown strategy! Defaulting to ANY.")
+                searchAny(query)
             }
+        }
+
+        if (results.isNotEmpty()) {
+            println("${results.size} persons found:")
+            results.forEach { println(it) }
         } else {
             println("No matching people found.")
+        }
+    }
+
+    private fun searchAll(query: List<String>): List<String> {
+        return dataLines.filterIndexed { index, _ ->
+            query.all { invertedIndex[it]?.contains(index) == true }
+        }
+    }
+
+    private fun searchAny(query: List<String>): List<String> {
+        val indices = mutableSetOf<Int>()
+        query.forEach { word ->
+            invertedIndex[word]?.let { indices.addAll(it) }
+        }
+        return indices.map { dataLines[it] }
+    }
+
+    private fun searchNone(query: List<String>): List<String> {
+        val indicesToExclude = mutableSetOf<Int>()
+        query.forEach { word ->
+            invertedIndex[word]?.let { indicesToExclude.addAll(it) }
+        }
+        return dataLines.filterIndexed { index, _ ->
+            index !in indicesToExclude
         }
     }
 
